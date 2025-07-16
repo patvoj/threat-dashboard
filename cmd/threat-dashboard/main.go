@@ -9,7 +9,7 @@ import (
 
 func main() {
 	port := flag.String("p", ":4000", "port number")
-	// templ := flag.String("t", "", "html template file path")
+	templ := flag.String("t", "./ui/threat.html.tmpl", "html template file path")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
@@ -18,16 +18,18 @@ func main() {
 	}))
 
 	app := application{
-		logger: logger,
+		logger:    logger,
+		templPath: *templ,
 	}
 
-	logger.Info("Starting a server at port: ", *port)
+	logger.Info("Starting a server at: ", "port", *port)
 
 	err := http.ListenAndServe(*port, app.routes())
-	logger.Error("Server could not start", err.Error())
+	logger.Error("Server could not start", "error", err.Error())
 	os.Exit(1)
 }
 
 type application struct {
-	logger *slog.Logger
+	logger    *slog.Logger
+	templPath string
 }
