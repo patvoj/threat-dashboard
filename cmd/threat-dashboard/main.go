@@ -9,7 +9,7 @@ import (
 
 func main() {
 	port := flag.String("p", ":4000", "port number")
-	templ := flag.String("t", "./ui/threat.html.tmpl", "html template file path")
+	templ := flag.String("t", "./ui/templates/threat.html.tmpl", "html template file path")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{

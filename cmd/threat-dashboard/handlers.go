@@ -2,66 +2,63 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"net/http"
 )
 
-func (app *application) index(filePath string) http.HandlerFunc {
+func (app *application) index() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Hello from the server")
-		fmt.Println("File path is:", filePath)
-
-		jsonData := `{
-			"threatName": "Win32/Rbot",
-			"category": "trojan",
-			"size": 437289,
-			"detectionDate": "2019-04-01",
-			"variants": [
-				{
-					"name": "Win32/TrojanProxy.Emotet.A",
-					"dateAdded": "2019-04-10"
-				},
-				{
-					"name": "Win32/TrojanProxy.Emotet.B",
-					"dateAdded": "2019-04-22"
-				}
-			]
-		}`
-
-		var threat ThreatData
-		if err := json.Unmarshal([]byte(jsonData), &threat); err != nil {
-			http.Error(w, "Error parsing JSON: "+err.Error(), http.StatusBadRequest)
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
 
-		tmpl, err := template.ParseFiles(filePath)
+		tmpl, err := template.ParseFiles(app.templPath)
 		if err != nil {
-			http.Error(w, "Error parsing template: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		w.Header().Set("Content-Type", "text/html")
-
-		if err := tmpl.Execute(w, threat); err != nil {
-			http.Error(w, "Error executing template: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
+		tmpl.Execute(w, nil)
 	}
 }
 
 func (app *application) render(w http.ResponseWriter, r *http.Request) {
-}
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-type ThreatData struct {
-	ThreatName    string          `json:"threatName"`
-	Category      string          `json:"category"`
-	Size          int             `json:"size"`
-	DetectionDate string          `json:"detectionDate"`
-	Variants      []ThreatVariant `json:"variants"`
-}
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Unable to parse form", http.StatusBadRequest)
+		return
+	}
 
-type ThreatVariant struct {
-	Name      string `json:"name"`
-	DateAdded string `json:"dateAdded"`
+	rawJSON := r.FormValue("json_input")
+
+	var threat ThreatData
+	if err := json.Unmarshal([]byte(rawJSON), &threat); err != nil {
+		http.Error(w, "Invalid JSON: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	data := struct {
+		Threat ThreatData
+	}{
+		Threat: threat,
+	}
+
+	tmpl, err := template.ParseFiles(app.templPath)
+	if err != nil {
+		http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	if err := tmpl.Execute(w, data); err != nil {
+		http.Error(w, "Render error: "+err.Error(), http.StatusInternalServerError)
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
