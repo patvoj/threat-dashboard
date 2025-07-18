@@ -8,8 +8,9 @@ func (app *application) routes() http.Handler {
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
 
-	mux.HandleFunc("/", app.index())
+	mux.HandleFunc("/", app.index)
 	mux.HandleFunc("/render", app.render)
 
+	app.logger.Debug("Routes configured successfully")
 	return mux
 }

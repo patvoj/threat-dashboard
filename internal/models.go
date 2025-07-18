@@ -1,4 +1,4 @@
-package main
+package models
 
 type ThreatData struct {
 	ThreatName    string          `json:"threatName"`

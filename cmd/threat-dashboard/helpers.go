@@ -4,10 +4,15 @@ import (
 	"bufio"
 	"encoding/json"
 	"os"
+
+	models "github.com/patvoj/threat-dashboard/internal"
 )
 
-func (app *application) saveThreat(threat ThreatData) error {
-	f, err := os.OpenFile("threats.jsonl", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+// saveThreat appends a threat record to the JSONL data file.
+// It creates the file if it doesn't exist and ensures proper JSON formatting.
+// Returns an error if file operations fail.
+func (app *application) saveThreat(threat models.ThreatData) error {
+	f, err := os.OpenFile("internal/threats.jsonl", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
@@ -17,17 +22,20 @@ func (app *application) saveThreat(threat ThreatData) error {
 	return enc.Encode(threat)
 }
 
-func loadAllThreats() ([]ThreatData, error) {
-	file, err := os.Open("threats.jsonl")
+// loadAllThreats reads all threat records from the JSONL data file.
+// It parses each line as a separate JSON object and returns a slice of ThreatData.
+// Returns an empty slice if the file doesn't exist.
+func loadAllThreats() ([]models.ThreatData, error) {
+	file, err := os.Open("internal/threats.jsonl")
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	var threats []ThreatData
+	var threats []models.ThreatData
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		var t ThreatData
+		var t models.ThreatData
 		if err := json.Unmarshal(scanner.Bytes(), &t); err != nil {
 			continue
 		}
