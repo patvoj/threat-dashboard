@@ -30,7 +30,7 @@ func (app *application) index(w http.ResponseWriter, r *http.Request) {
 		Threats: threats,
 	}
 
-	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	if err := app.templates.Execute(w, data); err != nil {
 		app.logger.Error("Template execution failed", "error", err)
 		http.Error(w, "Template rendering failed", http.StatusInternalServerError)
