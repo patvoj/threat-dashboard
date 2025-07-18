@@ -13,6 +13,18 @@ func (app *application) index() http.HandlerFunc {
 			return
 		}
 
+		threats, err := loadAllThreats()
+		if err != nil {
+			http.Error(w, "Failed to load threats", http.StatusInternalServerError)
+			return
+		}
+
+		data := struct {
+			Threats []ThreatData
+		}{
+			Threats: threats,
+		}
+
 		tmpl, err := template.ParseFiles(app.templPath)
 		if err != nil {
 			http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
@@ -20,7 +32,7 @@ func (app *application) index() http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "text/html")
-		tmpl.Execute(w, nil)
+		tmpl.Execute(w, data)
 	}
 }
 
@@ -43,21 +55,9 @@ func (app *application) render(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := struct {
-		Threat ThreatData
-	}{
-		Threat: threat,
-	}
-
-	tmpl, err := template.ParseFiles(app.templPath)
-	if err != nil {
-		http.Error(w, "Template error: "+err.Error(), http.StatusInternalServerError)
+	if err := app.saveThreat(threat); err != nil {
+		http.Error(w, "Failed to save threat: "+err.Error(), http.StatusInternalServerError)
 		return
-	}
-
-	w.Header().Set("Content-Type", "text/html")
-	if err := tmpl.Execute(w, data); err != nil {
-		http.Error(w, "Render error: "+err.Error(), http.StatusInternalServerError)
 	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)

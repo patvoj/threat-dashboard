@@ -20,21 +20,25 @@
       </div>
       <div class="section">
         <h1>Threat Dashboard</h1>
+        {{range .Threats}}
         <div class="threat-card">
           <ul>
-          <li>Name: <b>{{.Threat.ThreatName}}</b></li>
-            <li>Category: {{.Threat.Category}}</li>
-            <li>Size: {{.Threat.Size}} bytes</li>
-            <li>Detection Date: {{.Threat.DetectionDate}}</li>
+            <li>Name: <b>{{.ThreatName}}</b>
+            </li>
+            <li>Category: {{.Category}}</li>
+            <li>Size: {{.Size}} bytes</li>
+            <li>Detection Date: {{.DetectionDate}}</li>
             <li>Variants: <ul>
-                {{range .Threat.Variants}}
+                {{range .Variants}}
                 <li>Name: {{.Name}}</li>
-                <li>Date Added: {{.DateAdded}}</li><br>
+                <li>Date Added: {{.DateAdded}}</li>
+                <br>
                 {{end}}
               </ul>
             </li>
           </ul>
         </div>
+        {{end}}
       </div>
   </body>
 </html>
