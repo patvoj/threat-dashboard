@@ -43,7 +43,7 @@ func (app *application) index(w http.ResponseWriter, r *http.Request) {
 // Returns HTTP 405 for non POST requests.
 func (app *application) render(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		app.logger.Warn("Method not allowed", "method", r.Method, "path", r.URL.Path)
+		app.logger.Error("Method not allowed", "method", r.Method, "path", r.URL.Path)
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
@@ -56,7 +56,7 @@ func (app *application) render(w http.ResponseWriter, r *http.Request) {
 
 	rawJSON := r.FormValue("json_input")
 	if rawJSON == "" {
-		app.logger.Warn("Empty JSON input received")
+		app.logger.Error("Empty JSON input received")
 		http.Error(w, "JSON input is required", http.StatusBadRequest)
 		return
 	}
