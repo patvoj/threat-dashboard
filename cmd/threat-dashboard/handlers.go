@@ -12,7 +12,7 @@ import (
 // Returns HTTP 405 for non GET requests.
 func (app *application) index(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		app.logger.Warn("Method not allowed", "method", r.Method, "path", r.URL.Path)
+		app.logger.Error("Method not allowed", "method", r.Method, "path", r.URL.Path)
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
@@ -31,7 +31,7 @@ func (app *application) index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	if err := app.templates.Execute(w, data); err != nil {
+	if err := app.template.Execute(w, data); err != nil {
 		app.logger.Error("Template execution failed", "error", err)
 		http.Error(w, "Template rendering failed", http.StatusInternalServerError)
 		return
